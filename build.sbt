@@ -20,7 +20,8 @@ ThisBuild / scalacOptions ++= Seq(
   "-deprecation",
   "-Ypartial-unification")
 
-val catsVersion = "1.3.0"
+val catsVersion = "1.6.0"
+val catsEffectVersion = "1.3.0"
 val http4sVersion = "0.20.0"
 val circeVersion = "0.11.1"
 
@@ -38,7 +39,7 @@ lazy val ui = project
   .settings(moduleName := "ui", name := "User interface")
   .settings(libraryDependencies := Seq(
     "org.typelevel" %% "cats-core"   % catsVersion,
-    "org.typelevel" %% "cats-effect" % catsVersion,
+    "org.typelevel" %% "cats-effect" % catsEffectVersion,
     "org.http4s" %% "http4s-dsl"          % http4sVersion,
     "org.http4s" %% "http4s-blaze-server" % http4sVersion,
     "org.http4s" %% "http4s-circe"        % http4sVersion,
