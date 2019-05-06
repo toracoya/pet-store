@@ -4,7 +4,21 @@ ThisBuild / version      := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalafmtOnCompile := true
 
-ThisBuild / scalacOptions += "-Ypartial-unification"
+ThisBuild / scalacOptions ++= Seq(
+  "-encoding",
+  "UTF-8",
+  "-feature",
+  "-language:higherKinds",
+  "-language:implicitConversions",
+  "-unchecked",
+  "-Ywarn-dead-code",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-value-discard",
+  "-Xfuture",
+  "-Yno-adapted-args",
+  "-Xfatal-warnings",
+  "-deprecation",
+  "-Ypartial-unification")
 
 val catsVersion = "1.3.0"
 val http4sVersion = "0.20.0"
