@@ -2,7 +2,7 @@ package com.toracoya.petstore.pets
 
 import cats.effect.Effect
 import cats.implicits._
-import com.toracoya.petstore.pet.{Pet, PetId, PetName}
+import com.toracoya.petstore.pet.PetService
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.HttpRoutes
@@ -13,27 +13,20 @@ import scala.language.higherKinds
 
 class Endpoints[F[_]: Effect] extends Http4sDsl[F] {
 
-  def endpoints: HttpRoutes[F] = list
+  def endpoints(service: PetService[F]): HttpRoutes[F] = list(service)
 
-  private def list: HttpRoutes[F] =
+  private def list(service: PetService[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
       case GET -> Root / "pets" =>
         for {
-          retrieved <- pets
+          retrieved <- service.list
           response <- Ok(retrieved.asJson)
         } yield response
     }
-
-  private def pets: F[List[Pet]] =
-    List(
-      Pet(PetId(1L), PetName("Max")),
-      Pet(PetId(2L), PetName("Bella")),
-      Pet(PetId(3L), PetName("Lucy"))
-    ).pure[F]
 
 }
 
 object Endpoints {
 
-  def apply[F[_]: Effect]: HttpRoutes[F] = new Endpoints[F].endpoints
+  def apply[F[_]: Effect](service: PetService[F]): HttpRoutes[F] = new Endpoints[F].endpoints(service)
 }

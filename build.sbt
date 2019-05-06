@@ -25,21 +25,31 @@ val catsEffectVersion = "1.3.0"
 val http4sVersion = "0.20.0"
 val circeVersion = "0.11.1"
 
+lazy val commonDependencies = Seq(
+  "org.typelevel" %% "cats-core"   % catsVersion,
+  "org.typelevel" %% "cats-effect" % catsEffectVersion
+)
+
 lazy val petStore = project
   .in(file("."))
-  .aggregate(domain, ui)
-  .dependsOn(domain, ui)
+  .aggregate(domain, application, ui)
+  .dependsOn(domain, application, ui)
 
 lazy val domain = project
   .in(file("domain"))
   .settings(moduleName := "domain", name := "Domain")
+  .settings(libraryDependencies := commonDependencies)
+
+lazy val application = project
+  .in(file("application"))
+  .settings(moduleName := "application", name := "Application")
+  .settings(libraryDependencies := commonDependencies)
+  .dependsOn(domain)
 
 lazy val ui = project
   .in(file("ui"))
   .settings(moduleName := "ui", name := "User interface")
-  .settings(libraryDependencies := Seq(
-    "org.typelevel" %% "cats-core"   % catsVersion,
-    "org.typelevel" %% "cats-effect" % catsEffectVersion,
+  .settings(libraryDependencies := commonDependencies ++ Seq(
     "org.http4s" %% "http4s-dsl"          % http4sVersion,
     "org.http4s" %% "http4s-blaze-server" % http4sVersion,
     "org.http4s" %% "http4s-circe"        % http4sVersion,
@@ -52,4 +62,4 @@ lazy val ui = project
     fork in run := true,
     cancelable in Global := true
   ))
-  .dependsOn(domain)
+  .dependsOn(domain, application)

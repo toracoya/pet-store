@@ -2,6 +2,7 @@ package com.toracoya.petstore
 
 import cats.effect._
 import cats.implicits._
+import com.toracoya.petstore.pet.PetService
 import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
@@ -19,7 +20,7 @@ object Server extends IOApp {
       .drain
       .as(ExitCode.Success)
 
-  private def httpApp[F[_]: ContextShift: ConcurrentEffect: Timer] = Router("/" -> services[F]).orNotFound
+  private def httpApp[F[_]: ContextShift: ConcurrentEffect: Timer] = Router("/" -> endpoints[F]).orNotFound
 
-  private def services[F[_]: ContextShift: ConcurrentEffect: Timer] = pets.Endpoints.apply[F]
+  private def endpoints[F[_]: ContextShift: ConcurrentEffect: Timer] = pets.Endpoints.apply[F](PetService.apply[F])
 }
