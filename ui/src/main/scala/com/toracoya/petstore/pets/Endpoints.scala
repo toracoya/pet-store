@@ -3,6 +3,7 @@ package com.toracoya.petstore.pets
 import cats.effect.Effect
 import cats.implicits._
 import com.toracoya.petstore.pet.PetService
+import com.toracoya.petstore.pets.json.PetsJson
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.HttpRoutes
@@ -20,7 +21,7 @@ class Endpoints[F[_]: Effect] extends Http4sDsl[F] {
       case GET -> Root / "pets" =>
         for {
           retrieved <- service.list
-          response <- Ok(retrieved.asJson)
+          response <- Ok(PetsJson.from(retrieved).asJson)
         } yield response
     }
 
