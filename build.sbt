@@ -8,6 +8,7 @@ ThisBuild / scalacOptions += "-Ypartial-unification"
 
 val catsVersion = "1.3.0"
 val http4sVersion = "0.20.0"
+val circeVersion = "0.11.1"
 
 lazy val petStore = project
   .in(file("."))
@@ -22,10 +23,15 @@ lazy val ui = project
   .in(file("ui"))
   .settings(moduleName := "ui", name := "User interface")
   .settings(libraryDependencies := Seq(
-    "org.typelevel" %% "cats-core" % catsVersion,
+    "org.typelevel" %% "cats-core"   % catsVersion,
     "org.typelevel" %% "cats-effect" % catsVersion,
-    "org.http4s" %% "http4s-dsl" % http4sVersion,
-    "org.http4s" %% "http4s-blaze-server" % http4sVersion
+    "org.http4s" %% "http4s-dsl"          % http4sVersion,
+    "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+    "org.http4s" %% "http4s-circe"        % http4sVersion,
+    "io.circe" %% "circe-generic"        % circeVersion,
+    "io.circe" %% "circe-literal"        % circeVersion,
+    "io.circe" %% "circe-generic-extras" % circeVersion,
+    "io.circe" %% "circe-parser"         % circeVersion
   ))
   .settings(Seq(
     fork in run := true,

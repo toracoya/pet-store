@@ -1,28 +1,25 @@
 package com.toracoya.petstore
 
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect._
 import cats.implicits._
-import org.http4s.HttpRoutes
-import org.http4s.dsl.impl.Root
-import org.http4s.dsl.io._
 import org.http4s.implicits._
+import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 
-object Server extends IOApp {
+import scala.language.higherKinds
 
-  private val helloWorld = HttpRoutes
-    .of[IO] {
-      case GET -> Root / "hello" / name =>
-        Ok(s"Hello, $name.")
-    }
-    .orNotFound
+object Server extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] =
     BlazeServerBuilder[IO]
       .bindHttp(8080, "localhost")
-      .withHttpApp(helloWorld)
+      .withHttpApp(httpApp)
       .serve
       .compile
       .drain
       .as(ExitCode.Success)
+
+  private def httpApp[F[_]: ContextShift: ConcurrentEffect: Timer] = Router("/" -> services[F]).orNotFound
+
+  private def services[F[_]: ContextShift: ConcurrentEffect: Timer] = pets.Endpoints.apply[F]
 }
