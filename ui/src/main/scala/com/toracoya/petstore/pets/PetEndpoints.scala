@@ -14,13 +14,19 @@ import scala.language.higherKinds
 
 class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
 
+  import com.toracoya.petstore.Pagination._
+
   def routes(service: PetService[F]): HttpRoutes[F] = list(service)
 
   private def list(service: PetService[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
-      case GET -> Root / "pets" =>
+      case GET -> Root / "pets" :? PageMatcher(maybePage) :? PageSizeMatcher(maybePageSize) =>
+        val page = maybePage.getOrElse(DefaultPage)
+        val pageSize = maybePageSize.getOrElse(DefaultPageSize)
+        val from = page * pageSize
+        val until = from + pageSize
         for {
-          retrieved <- service.list
+          retrieved <- service.list(from, until)
           response <- Ok(PetsJson.from(retrieved).asJson)
         } yield response
     }

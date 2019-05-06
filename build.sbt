@@ -24,10 +24,12 @@ val catsVersion = "1.6.0"
 val catsEffectVersion = "1.3.0"
 val http4sVersion = "0.20.0"
 val circeVersion = "0.11.1"
+val scalaTestVersion = "3.0.5"
 
 lazy val commonDependencies = Seq(
   "org.typelevel" %% "cats-core"   % catsVersion,
-  "org.typelevel" %% "cats-effect" % catsEffectVersion
+  "org.typelevel" %% "cats-effect" % catsEffectVersion,
+  "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
 )
 
 lazy val petStore = project
