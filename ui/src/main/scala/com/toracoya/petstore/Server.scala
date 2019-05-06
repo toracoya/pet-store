@@ -22,5 +22,5 @@ object Server extends IOApp {
 
   private def httpApp[F[_]: ContextShift: ConcurrentEffect: Timer] = Router("/" -> endpoints[F]).orNotFound
 
-  private def endpoints[F[_]: ContextShift: ConcurrentEffect: Timer] = pets.Endpoints.apply[F](PetService.apply[F])
+  private def endpoints[F[_]: ContextShift: ConcurrentEffect: Timer] = pets.PetEndpoints.apply[F](PetService.apply[F])
 }

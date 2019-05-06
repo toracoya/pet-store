@@ -12,9 +12,9 @@ import org.http4s.dsl.Http4sDsl
 
 import scala.language.higherKinds
 
-class Endpoints[F[_]: Effect] extends Http4sDsl[F] {
+class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
 
-  def endpoints(service: PetService[F]): HttpRoutes[F] = list(service)
+  def routes(service: PetService[F]): HttpRoutes[F] = list(service)
 
   private def list(service: PetService[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
@@ -27,7 +27,7 @@ class Endpoints[F[_]: Effect] extends Http4sDsl[F] {
 
 }
 
-object Endpoints {
+object PetEndpoints {
 
-  def apply[F[_]: Effect](service: PetService[F]): HttpRoutes[F] = new Endpoints[F].endpoints(service)
+  def apply[F[_]: Effect](service: PetService[F]): HttpRoutes[F] = new PetEndpoints[F].routes(service)
 }
