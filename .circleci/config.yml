@@ -3,6 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/openjdk:11-jdk
+      - image: toracoya/petstore-db:0.0.1
 
     working_directory: ~/repo
 
@@ -21,6 +22,10 @@ jobs:
             - ~/.m2
             - ~/.ivy2
           key: v1-dependencies--{{ checksum "build.sbt" }}
+
+      - run:
+          name: wait for db
+          command: dockerize -wait tcp://127.0.0.1:5432 -timeout 120s
 
       # run tests!
       - run: cat /dev/null | sbt test:test
