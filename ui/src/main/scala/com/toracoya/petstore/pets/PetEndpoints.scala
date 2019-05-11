@@ -31,8 +31,10 @@ class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
           case Valid(pagination) =>
             val (from, until) = pagination.range
             for {
-              retrieved <- service.list(from, until)
-              response <- Ok(PetsJson.from(retrieved).asJson)
+              retrieved <- service.list(from, until + 1)
+              hasNext = retrieved.count > until
+              pet = if (hasNext) retrieved.init else retrieved
+              response <- Ok(PetsJson.from(pet, hasNext).asJson)
             } yield response
           case Invalid(errors) =>
             BadRequest(ErrorsJson.from(errors).asJson)

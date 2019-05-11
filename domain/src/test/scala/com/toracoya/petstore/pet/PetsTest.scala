@@ -4,6 +4,54 @@ import org.scalatest.WordSpec
 
 class PetsTest extends WordSpec {
 
+  "#count" when {
+    "empty" should {
+      "return 0" in {
+        assert(Pets.empty.count == 0)
+      }
+    }
+
+    "have more than or equal to one pet" should {
+      "return the number of pets" in {
+        val pets = Pets(pet1, pet2, pet3)
+
+        assert(pets.count == 3)
+      }
+    }
+  }
+
+  "#init" when {
+    "empty" should {
+      "return empty" in {
+        assert(Pets.empty.init == Pets.empty)
+      }
+    }
+
+    "have more than or equal to one pet" should {
+      "return pets that removed the last pet" in {
+        val pets = Pets(pet1, pet2, pet3)
+
+        assert(pets.init == Pets(pet1, pet2))
+      }
+    }
+  }
+
+  "#isEmpty" when {
+    "empty" should {
+      "return true" in {
+        assert(Pets.empty.isEmpty)
+      }
+    }
+
+    "have more than or equal to one pet" should {
+      "return false" in {
+        val pets = Pets(pet1, pet2, pet3)
+
+        assert(!pets.isEmpty)
+      }
+    }
+  }
+
   "#slice" when {
     "empty" should {
       "return empty" in {
