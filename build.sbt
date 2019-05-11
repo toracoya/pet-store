@@ -24,18 +24,37 @@ val catsVersion = "1.6.0"
 val catsEffectVersion = "1.3.0"
 val http4sVersion = "0.20.0"
 val circeVersion = "0.11.1"
+val circeConfigVersion = "0.6.1"
+val doobieVersion = "0.6.0"
+val logbackVersion = "1.2.3"
 val scalaTestVersion = "3.0.5"
 
 lazy val commonDependencies = Seq(
   "org.typelevel" %% "cats-core"   % catsVersion,
   "org.typelevel" %% "cats-effect" % catsEffectVersion,
-  "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
+  "ch.qos.logback" %  "logback-classic" % logbackVersion,
+  "org.scalatest" %% "scalatest" % scalaTestVersion % Test
+)
+
+lazy val databaseDependencies = Seq(
+  "org.tpolecat" %% "doobie-core"      % doobieVersion,
+  "org.tpolecat" %% "doobie-hikari"    % doobieVersion,
+  "org.tpolecat" %% "doobie-postgres"  % doobieVersion,
+  "org.tpolecat" %% "doobie-scalatest" % doobieVersion % Test
+)
+
+lazy val circeDependencies = Seq(
+  "io.circe" %% "circe-generic"        % circeVersion,
+  "io.circe" %% "circe-literal"        % circeVersion,
+  "io.circe" %% "circe-generic-extras" % circeVersion,
+  "io.circe" %% "circe-parser"         % circeVersion,
+  "io.circe" %% "circe-config"         % circeConfigVersion
 )
 
 lazy val petStore = project
   .in(file("."))
-  .aggregate(domain, application, ui)
-  .dependsOn(domain, application, ui)
+  .aggregate(domain, application, infrastructure, ui)
+  .dependsOn(domain, application, infrastructure, ui)
 
 lazy val domain = project
   .in(file("domain"))
@@ -48,20 +67,22 @@ lazy val application = project
   .settings(libraryDependencies := commonDependencies)
   .dependsOn(domain)
 
+lazy val infrastructure = project
+  .in(file("infrastructure"))
+  .settings(moduleName := "infrastructure", name := "Infrastructure")
+  .settings(libraryDependencies := commonDependencies ++ databaseDependencies ++ circeDependencies)
+  .dependsOn(domain, application)
+
 lazy val ui = project
   .in(file("ui"))
   .settings(moduleName := "ui", name := "User interface")
-  .settings(libraryDependencies := commonDependencies ++ Seq(
+  .settings(libraryDependencies := commonDependencies ++ circeDependencies ++ Seq(
     "org.http4s" %% "http4s-dsl"          % http4sVersion,
     "org.http4s" %% "http4s-blaze-server" % http4sVersion,
-    "org.http4s" %% "http4s-circe"        % http4sVersion,
-    "io.circe" %% "circe-generic"        % circeVersion,
-    "io.circe" %% "circe-literal"        % circeVersion,
-    "io.circe" %% "circe-generic-extras" % circeVersion,
-    "io.circe" %% "circe-parser"         % circeVersion
+    "org.http4s" %% "http4s-circe"        % http4sVersion
   ))
   .settings(Seq(
     fork in run := true,
     cancelable in Global := true
   ))
-  .dependsOn(domain, application)
+  .dependsOn(domain, application, infrastructure)

@@ -23,8 +23,11 @@ class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
       case GET -> Root / "pets" :? PageMatcher(maybePage) :? PageSizeMatcher(maybePageSize) =>
         val page = maybePage.getOrElse(DefaultPage)
         val pageSize = maybePageSize.getOrElse(DefaultPageSize)
+
+        // TODO: Check page and pageSize
         val from = page * pageSize
         val until = from + pageSize
+
         for {
           retrieved <- service.list(from, until)
           response <- Ok(PetsJson.from(retrieved).asJson)
