@@ -53,8 +53,8 @@ lazy val circeDependencies = Seq(
 
 lazy val petStore = project
   .in(file("."))
-  .aggregate(domain, application, infrastructure, ui)
-  .dependsOn(domain, application, infrastructure, ui)
+  .aggregate(domain, application, infrastructure, userAPI)
+  .dependsOn(domain, application, infrastructure, userAPI)
 
 lazy val domain = project
   .in(file("domain"))
@@ -73,9 +73,9 @@ lazy val infrastructure = project
   .settings(libraryDependencies := commonDependencies ++ databaseDependencies ++ circeDependencies)
   .dependsOn(domain, application)
 
-lazy val ui = project
-  .in(file("ui"))
-  .settings(moduleName := "ui", name := "User interface")
+lazy val userAPI = project
+  .in(file("user-api"))
+  .settings(moduleName := "user-api", name := "User API")
   .settings(libraryDependencies := commonDependencies ++ circeDependencies ++ Seq(
     "org.http4s" %% "http4s-dsl"          % http4sVersion,
     "org.http4s" %% "http4s-blaze-server" % http4sVersion,
