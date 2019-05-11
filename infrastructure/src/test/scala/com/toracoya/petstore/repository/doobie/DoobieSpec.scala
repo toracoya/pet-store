@@ -19,9 +19,11 @@ trait DoobieSpec extends WordSpec {
       transactor <- config.transactor[IO]
     } yield transactor
 
-    resource.use { transactor =>
-      IO { f(transactor) }
-    }.unsafeRunSync()
+    resource
+      .use { transactor =>
+        IO { f(transactor) }
+      }
+      .unsafeRunSync()
   }
 
 }

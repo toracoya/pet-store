@@ -1,7 +1,10 @@
 package com.toracoya.petstore.pets
 
+import cats.data.Validated.{Invalid, Valid}
 import cats.effect.Effect
 import cats.implicits._
+import com.toracoya.petstore.error.json.ErrorsJson
+import com.toracoya.petstore.pagination.PaginationValidator
 import com.toracoya.petstore.pet.PetService
 import com.toracoya.petstore.pets.json.PetsJson
 import io.circe.generic.auto._
@@ -14,7 +17,7 @@ import scala.language.higherKinds
 
 class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
 
-  import com.toracoya.petstore.Pagination._
+  import com.toracoya.petstore.pagination.Pagination._
 
   def routes(service: PetService[F]): HttpRoutes[F] = list(service)
 
@@ -24,14 +27,16 @@ class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
         val page = maybePage.getOrElse(DefaultPage)
         val pageSize = maybePageSize.getOrElse(DefaultPageSize)
 
-        // TODO: Check page and pageSize
-        val from = page * pageSize
-        val until = from + pageSize
-
-        for {
-          retrieved <- service.list(from, until)
-          response <- Ok(PetsJson.from(retrieved).asJson)
-        } yield response
+        PaginationValidator.validate(page, pageSize) match {
+          case Valid(pagination) =>
+            val (from, until) = pagination.range
+            for {
+              retrieved <- service.list(from, until)
+              response <- Ok(PetsJson.from(retrieved).asJson)
+            } yield response
+          case Invalid(errors) =>
+            BadRequest(ErrorsJson.from(errors).asJson)
+        }
     }
 
 }
