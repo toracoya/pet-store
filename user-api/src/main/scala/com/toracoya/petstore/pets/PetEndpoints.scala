@@ -5,8 +5,9 @@ import cats.effect.Effect
 import cats.implicits._
 import com.toracoya.petstore.error.json.ErrorsJson
 import com.toracoya.petstore.pagination.PaginationValidator
-import com.toracoya.petstore.pet.PetService
-import com.toracoya.petstore.pets.json.PetsJson
+import com.toracoya.petstore.pet.{PetId, PetService}
+import com.toracoya.petstore.pets.PetEndpoints.PetIdVar
+import com.toracoya.petstore.pets.json.{PetJson, PetsJson}
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.HttpRoutes
@@ -14,12 +15,13 @@ import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
 import scala.language.higherKinds
+import scala.util.Try
 
 class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
 
   import com.toracoya.petstore.pagination.Pagination._
 
-  def routes(service: PetService[F]): HttpRoutes[F] = list(service)
+  def routes(service: PetService[F]): HttpRoutes[F] = get(service) <+> list(service)
 
   private def list(service: PetService[F]): HttpRoutes[F] =
     HttpRoutes.of[F] {
@@ -41,9 +43,21 @@ class PetEndpoints[F[_]: Effect] extends Http4sDsl[F] {
         }
     }
 
+  private def get(service: PetService[F]): HttpRoutes[F] =
+    HttpRoutes.of[F] {
+      case GET -> Root / "pets" / PetIdVar(id) =>
+        service.getBy(id).flatMap {
+          case Some(found) => Ok(PetJson.from(found).asJson)
+          case None => NotFound("")
+        }
+    }
 }
 
 object PetEndpoints {
+
+  private object PetIdVar {
+    def unapply(id: String): Option[PetId] = Try(id.toLong).map(PetId).toOption
+  }
 
   def apply[F[_]: Effect](service: PetService[F]): HttpRoutes[F] = new PetEndpoints[F].routes(service)
 }

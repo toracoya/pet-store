@@ -4,7 +4,7 @@ import cats.Monad
 import com.toracoya.petstore.pet._
 import com.toracoya.petstore.repository.doobie.SQLPagination._
 import doobie.implicits._
-import doobie.util.Get
+import doobie.util.{Get, Meta}
 import doobie.util.query.Query0
 import doobie.util.transactor.Transactor
 
@@ -16,7 +16,14 @@ private object SQL {
      ORDER BY id
   """.query
 
-  implicit private val petIdGet: Get[PetId] = Get[Long].tmap(id => PetId(id))
+  def select(id: PetId): Query0[Pet] = sql"""
+     SELECT id, name
+     FROM pets
+     WHERE id = $id
+  """.query
+
+  implicit val petMeta: Meta[PetId] = Meta[Long].timap(PetId.apply)(_.toLong)
+
   implicit private val petNameGet: Get[PetName] = Get[String].tmap(name => PetName(name))
 }
 
@@ -29,6 +36,8 @@ class DoobiePetRepository[F[_]: Monad](transactor: Transactor[F]) extends PetRep
       .to[List]
       .map(Pets.apply)
       .transact(transactor)
+
+  override def getBy(id: PetId): F[Option[Pet]] = select(id).option.transact(transactor)
 }
 
 object DoobiePetRepository {

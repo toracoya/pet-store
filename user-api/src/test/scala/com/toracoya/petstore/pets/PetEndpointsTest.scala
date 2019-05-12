@@ -47,12 +47,38 @@ class PetEndpointsTest extends EndpointsSpec with MockitoSugar {
     }
   }
 
+  "GET /pets/1" should {
+    "return the pet id = 1" in new Fixture {
+      private val response = endpoints.orNotFound.run(
+        Request(method = Method.GET, uri = Uri.uri("/pets/1"))
+      )
+      when(service.getBy(petId1)).thenReturn(IO(Option(pet1)))
+
+      assert(check[Json](response, Status.Ok, Option(petJson(pet1))))
+    }
+  }
+
+  "GET /pets/9999" should {
+    "return Not Found" in new Fixture {
+      private val response = endpoints.orNotFound.run(
+        Request(method = Method.GET, uri = Uri.uri("/pets/9999"))
+      )
+      when(service.getBy(ghostPetId)).thenReturn(IO(None))
+
+      assert(check[Json](response, Status.NotFound, None))
+    }
+  }
+
   trait Fixture {
     val service: PetService[IO] = mock[PetService[IO]]
     val endpoints: HttpRoutes[IO] = PetEndpoints.apply[IO](service)
 
-    val pet1 = Pet(PetId(1L), PetName("Bailey"))
-    val pet2 = Pet(PetId(2L), PetName("Bella"))
+    val petId1 = PetId(1L)
+    val petId2 = PetId(2L)
+    val ghostPetId = PetId(9999L)
+
+    val pet1 = Pet(petId1, PetName("Bailey"))
+    val pet2 = Pet(petId2, PetName("Bella"))
     val pets = Pets(pet1, pet2)
   }
 
@@ -74,6 +100,14 @@ class PetEndpointsTest extends EndpointsSpec with MockitoSugar {
          "hasNext": $hasNext
        }""")
   }
+
+  private def petJson(pet: Pet): Json =
+    toJson(s"""
+         {
+           "id": ${pet.id.toLong},
+           "name": "${pet.name.toString}"
+         }
+       """)
 
   private def errorsJson(errors: List[String]): Json = {
     val inner = errors
