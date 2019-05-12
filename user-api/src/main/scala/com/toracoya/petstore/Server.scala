@@ -23,16 +23,16 @@ object Server extends IOApp {
 
   private def buildServer[F[_]: ContextShift: ConcurrentEffect: Timer] =
     for {
-      httpApp <- buildHttpApp[F]
+      config <- Resource.liftF(parser.decodePathF[F, PetStoreConfig]("petstore"))
+      httpApp <- buildHttpApp[F](config)
       server <- BlazeServerBuilder[F]
-        .bindHttp(8080, "localhost")
+        .bindHttp(config.port, config.host)
         .withHttpApp(httpApp)
         .resource
     } yield server
 
-  private def buildHttpApp[F[_]: ContextShift: ConcurrentEffect: Timer] =
+  private def buildHttpApp[F[_]: ContextShift: ConcurrentEffect: Timer](config: PetStoreConfig) =
     for {
-      config <- Resource.liftF(parser.decodePathF[F, PetStoreConfig]("petstore"))
       transactor <- config.db.transactor
       petRepository = DoobiePetRepository[F](transactor)
       endpoints = pets.PetEndpoints.apply[F](PetService.apply[F](petRepository))

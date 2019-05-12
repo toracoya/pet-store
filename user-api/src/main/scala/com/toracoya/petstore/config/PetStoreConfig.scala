@@ -4,7 +4,7 @@ import com.toracoya.petstore.repository.doobie.DatabaseConfig
 import io.circe.Decoder
 import io.circe.generic.semiauto._
 
-case class PetStoreConfig(db: DatabaseConfig)
+case class PetStoreConfig(host: String, port: Int, db: DatabaseConfig)
 
 object PetStoreConfig {
 
