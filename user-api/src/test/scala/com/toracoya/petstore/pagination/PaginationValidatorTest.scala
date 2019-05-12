@@ -3,6 +3,7 @@ package com.toracoya.petstore.pagination
 import cats.data.{NonEmptyChain, NonEmptyList}
 import cats.implicits._
 import com.toracoya.petstore.APIValidation.{InvalidPage, InvalidPageSize}
+import com.toracoya.petstore.pagination.PaginationValidator.MaxPageSize
 import org.scalatest.WordSpec
 
 class PaginationValidatorTest extends WordSpec {
@@ -29,5 +30,11 @@ class PaginationValidatorTest extends WordSpec {
       }
     }
 
+    "page size is over max" should {
+      "return invalid" in {
+        val validated = PaginationValidator.validate(0, MaxPageSize + 10)
+        assert(validated == InvalidPageSize.invalidNec)
+      }
+    }
   }
 }

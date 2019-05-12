@@ -4,6 +4,7 @@ import cats.data.ValidatedNec
 import cats.implicits._
 import com.toracoya.petstore.APIValidation
 import com.toracoya.petstore.APIValidation.{InvalidPage, InvalidPageSize}
+import com.toracoya.petstore.pagination.PaginationValidator.MaxPageSize
 
 trait PaginationValidator {
 
@@ -16,7 +17,10 @@ trait PaginationValidator {
     if (page >= 0) page.validNec else InvalidPage.invalidNec
 
   private def validatePageSize(pageSize: Int): ValidationResult[Int] =
-    if (pageSize >= 0) pageSize.validNec else InvalidPageSize.invalidNec
+    if (pageSize >= 0 && pageSize <= MaxPageSize) pageSize.validNec else InvalidPageSize.invalidNec
 }
 
-object PaginationValidator extends PaginationValidator
+object PaginationValidator extends PaginationValidator {
+
+  val MaxPageSize = 100
+}
