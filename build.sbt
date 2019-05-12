@@ -28,12 +28,15 @@ val circeConfigVersion = "0.6.1"
 val doobieVersion = "0.6.0"
 val logbackVersion = "1.2.3"
 val scalaTestVersion = "3.0.5"
+val mockitoScalaVersion = "1.4.0-beta.8"
 
 lazy val commonDependencies = Seq(
   "org.typelevel" %% "cats-core"   % catsVersion,
   "org.typelevel" %% "cats-effect" % catsEffectVersion,
   "ch.qos.logback" %  "logback-classic" % logbackVersion,
-  "org.scalatest" %% "scalatest" % scalaTestVersion % Test
+  "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
+  "org.mockito" %% "mockito-scala" % mockitoScalaVersion % Test,
+  "org.mockito" %% "mockito-scala-scalatest" % mockitoScalaVersion % Test
 )
 
 lazy val databaseDependencies = Seq(
