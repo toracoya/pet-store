@@ -22,7 +22,7 @@ class PaginationValidatorTest extends WordSpec {
       }
     }
 
-    "both page and pageSize are nagative" should {
+    "both page and pageSize are negative" should {
       "return invalid" in {
         val validated = PaginationValidator.validate(-1, -1)
         assert(validated == NonEmptyChain.fromNonEmptyList(NonEmptyList.of(InvalidPage, InvalidPageSize)).invalid)
